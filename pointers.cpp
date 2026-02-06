@@ -19,6 +19,10 @@ int main(int argc, char **argv)
     Student student;
     double average;
 
+    std::string message;
+
+    printf("%d", promptInt(message, 0, 100));
+
     // Sequence of user input -> store in fields of `student`
 
     // Call `CalculateStudentAverage(???, ???)`
@@ -35,6 +39,21 @@ int main(int argc, char **argv)
 int promptInt(std::string message, int min, int max)
 {
     // Code to prompt user for an int
+    std::cout << "Please enter an int";
+
+    std::string result;
+    std::cin >> result;
+
+    for (int i=0; i<result.length(); i++){
+        char c = result[i];
+
+        if (c == '\0'){
+            break;
+        }
+    }
+
+    std::cout << message;
+    return 0;
 }
 
 /*
