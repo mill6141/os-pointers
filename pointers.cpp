@@ -16,6 +16,7 @@ double promptDouble(std::string message, double min, double max);
 void calculateStudentAverage(void *object, double *avg);
 char* promptString(std::string message);
 void printStudentInfo(Student student);
+double round_to_one_decimal_place(double num);
 
 int main(int argc, char **argv)
 {
@@ -27,23 +28,37 @@ int main(int argc, char **argv)
     //printf("%d", promptInt("Please enter an int \t", -100, 100));
 
     student.id = promptInt("Please enter the student's id number: ", 1, 999999999);
+    std::cin.ignore();
+
     student.f_name = promptString("Please enter the student's first name: ");
     student.l_name = promptString("Please enter the student's last name: ");
     student.n_assignments = promptInt("Please enter how many assignments were graded: ", 1, 134217728);
+    std::cin.ignore();
 
     student.grades = new double [student.n_assignments];
 
     for (int i=0; i<student.n_assignments; i++){
         message = "Please enter grade for assignment " + std::to_string(i+1) + ": ";
-        student.grades[i] = promptDouble(message, 0, 100);
+        student.grades[i] = promptDouble(message, 0.0, 100.0);
+        std::cin.ignore();
     }
 
 
-    printStudentInfo(student);
+    //printStudentInfo(student);
     // Sequence of user input -> store in fields of `student`
 
     // Call `CalculateStudentAverage(???, ???)`
     // Output `average`
+
+    calculateStudentAverage(&student, &average);
+
+    std::cout << "Student: " << student.f_name << " " << student.l_name <<  " [" << student.id << "]\n";
+    std::cout << "Average grade: " << round_to_one_decimal_place(average) << "\n";
+
+    delete[] student.f_name;
+    delete[] student.l_name;
+    delete[] student.grades;
+
 
     return 0;
 }
@@ -75,12 +90,12 @@ int promptInt(std::string message, int min, int max)
                 continue;
             }
             
-            if((c != 46) && ((c < 48) || (c > 57 ))){
+            if(((c < 48) || (c > 57 ))){
                 std::cout << "Sorry, I cannot understand your answer \n";
                 break;
             }
 
-            final_int += ( pow(10, (result.length() - 1) - i) * (c - 48));
+            final_int += ( pow(10, (result.length() - 1) - i) * (c - 48)); // convert char to int and add to final_int
 
             if(i == result.length()-1){
                 finished = true;
@@ -92,7 +107,8 @@ int promptInt(std::string message, int min, int max)
         }
 
         if ((final_int < min) || (final_int > max)){
-            std::cout << "Please enter a number between [" << min <<", " << max << "] \n";
+            //std::cout << "Please enter a number between [" << min <<", " << max << "] \n";
+            std::cout << "Sorry, I cannot understand your answer \n";
             finished = false;
         }
     }
@@ -108,8 +124,84 @@ int promptInt(std::string message, int min, int max)
 */
 double promptDouble(std::string message, double min, double max)
 {
-    // Code to prompt user for a double
-    return 0.0;
+    // Code to prompt user for an int
+    std::string result;
+    
+    bool finished = false;
+    bool negative = false;
+    bool decimal = false;
+
+    int decimal_index = -1;
+
+    double final_double = 0;
+
+    while (!finished){
+        final_double = 0;
+        negative = false;
+        std::cout << message;
+        std::cin >> result;
+
+        if(result.length() == 0){
+            std::cout << "Sorry, I cannot understand your answer \n";
+            continue;
+        } else if(result.length() > 10){
+            //std::cout << "Please enter a number with at most 10 digits, including the decimal \n";
+            std::cout << "Sorry, I cannot understand your answer \n";
+            continue;
+        }
+
+        for (int i=0; i<result.length(); i++){
+            char c = result[i];
+
+            if((c == 45) && (i==0)){
+                negative = true;
+                continue;
+            }
+            
+            if((c != 46) && ((c < 48) || (c > 57 ))){
+                std::cout << "Sorry, I cannot understand your answer \n";
+                break;
+            } else if (c == 46){
+                // Entereed a decimal point - only allow one
+                if (decimal){
+                    std::cout << "Sorry, I cannot understand your answer \n";
+                    break;
+                } else {
+                    decimal = true;
+                    decimal_index = i;
+                    //final_double /= pow(10, (result.length() - 1) - i); // divide by the appropriate power of 10 to shift the decimal point
+                    continue;
+                }
+            }
+
+            if(!decimal){
+                final_double += ( pow(10, (result.length() - 1) - i) * (c - 48)); // convert char to double and add to final_double
+            } else{
+                final_double += ( pow(10, (result.length() - 1) - i + 1) * (c - 48)); // convert char to double and add to final_double
+            }
+            if(i == result.length()-1){
+                finished = true;
+            }
+        }
+
+        if(decimal_index != -1){
+            final_double /= pow(10, (result.length()) - decimal_index); // divide by the appropriate power of 10 to shift the decimal point
+        }
+
+        if(negative){
+            final_double *= -1;
+        }
+
+        if ((final_double < min) || (final_double > max)){
+            //std::cout << "You entered: " << final_double << " \n";
+            //std::cout << "Please enter a number between [" << min <<", " << max << "] \n";
+            std::cout << "Sorry, I cannot understand your answer \n";
+            finished = false;
+        }
+    }
+
+    //std::cout << "\n" << final_double << "\n";
+    return final_double;
 }
 
 /*
@@ -119,10 +211,21 @@ double promptDouble(std::string message, double min, double max)
 void calculateStudentAverage(void *object, double *avg)
 {
     // Code to calculate and store average grade
+
+    // object will be our student struct, so cast the void pointer to a Student pointer
+    Student *student = (Student *) object;
+
+    // Our average will be the sum of the grades divided by the number of assignments
+    double sum = 0;
+
+    for (int i=0; i<student->n_assignments; i++){
+        sum += student->grades[i];
+    }
+    *avg = sum / student->n_assignments;
 }
 
 char* promptString(std::string message){
-    // Code to prompt user for an int
+    // Code to prompt user for a string
     std::string result;
     
     bool finished = false;
@@ -131,13 +234,13 @@ char* promptString(std::string message){
 
     while (!finished){
         std::cout << message;
-        std::cin >> result;
+        std::getline(std::cin, result);
 
-        final_string = new char [result.length()];
+        final_string = new char [result.length() + 1];
         for (int i=0; i<result.length(); i++){
             char c = result[i];
             
-            if(((c < 65) || (c > 90)) && ((c < 97) || (c > 122))){
+            if(((c < 65) || (c > 90)) && ((c < 97) || (c > 122)) && (c != 32)){
                 std::cout << "Sorry, I cannot understand your answer \n";
                 break;
             }
@@ -147,10 +250,16 @@ char* promptString(std::string message){
             }
             final_string[i] = c;
         }
+        
     }
 
+    final_string[result.length()] = '\0'; // Null terminate the string
     //std::cout << "\n" << final_int << "\n";
     return final_string;
+}
+
+double round_to_one_decimal_place(double num){
+    return std::round(num * 10) / 10;
 }
 
 void printStudentInfo(Student student){
