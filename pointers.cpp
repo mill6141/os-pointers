@@ -28,19 +28,20 @@ int main(int argc, char **argv)
     //printf("%d", promptInt("Please enter an int \t", -100, 100));
 
     student.id = promptInt("Please enter the student's id number: ", 1, 999999999);
-    std::cin.ignore();
+    //std::cin.ignore();
 
     student.f_name = promptString("Please enter the student's first name: ");
     student.l_name = promptString("Please enter the student's last name: ");
     student.n_assignments = promptInt("Please enter how many assignments were graded: ", 1, 134217728);
-    std::cin.ignore();
+    //std::cin.ignore();
 
     student.grades = new double [student.n_assignments];
+    std::cout << "\n";
 
     for (int i=0; i<student.n_assignments; i++){
-        message = "Please enter grade for assignment " + std::to_string(i+1) + ": ";
-        student.grades[i] = promptDouble(message, 0.0, 100.0);
-        std::cin.ignore();
+        message = "Please enter grade for assignment " + std::to_string(i) + ": ";
+        student.grades[i] = promptDouble(message, 0.0, 1000.0);
+        //std::cin.ignore();
     }
 
 
@@ -52,8 +53,8 @@ int main(int argc, char **argv)
 
     calculateStudentAverage(&student, &average);
 
-    std::cout << "Student: " << student.f_name << " " << student.l_name <<  " [" << student.id << "]\n";
-    std::cout << "Average grade: " << round_to_one_decimal_place(average) << "\n";
+    std::cout << "\nStudent: " << student.f_name << " " << student.l_name <<  " [" << student.id << "]\n";
+    std::cout << "  Average grade: " << round_to_one_decimal_place(average) << "\n";
 
     delete[] student.f_name;
     delete[] student.l_name;
@@ -81,7 +82,8 @@ int promptInt(std::string message, int min, int max)
         final_int = 0;
         negative = false;
         std::cout << message;
-        std::cin >> result;
+        std::getline(std::cin, result);
+
         for (int i=0; i<result.length(); i++){
             char c = result[i];
 
@@ -91,7 +93,9 @@ int promptInt(std::string message, int min, int max)
             }
             
             if(((c < 48) || (c > 57 ))){
-                std::cout << "Sorry, I cannot understand your answer \n";
+                std::cout << "Sorry, I cannot understand your answer";
+                std::cout << std::endl;
+
                 break;
             }
 
@@ -106,9 +110,11 @@ int promptInt(std::string message, int min, int max)
             final_int *= -1;
         }
 
-        if ((final_int < min) || (final_int > max)){
+        if (((final_int < min) || (final_int > max)) && finished){
             //std::cout << "Please enter a number between [" << min <<", " << max << "] \n";
-            std::cout << "Sorry, I cannot understand your answer \n";
+            std::cout << "Sorry, I cannot understand your answer";
+            std::cout << std::endl;
+
             finished = false;
         }
     }
@@ -139,14 +145,18 @@ double promptDouble(std::string message, double min, double max)
         final_double = 0;
         negative = false;
         std::cout << message;
-        std::cin >> result;
+        std::getline(std::cin, result);
 
         if(result.length() == 0){
-            std::cout << "Sorry, I cannot understand your answer \n";
+            std::cout << "Sorry, I cannot understand your answer";
+            std::cout << std::endl;
+
             continue;
         } else if(result.length() > 10){
             //std::cout << "Please enter a number with at most 10 digits, including the decimal \n";
-            std::cout << "Sorry, I cannot understand your answer \n";
+            std::cout << "Sorry, I cannot understand your answer";
+            std::cout << std::endl;
+
             continue;
         }
 
@@ -159,12 +169,16 @@ double promptDouble(std::string message, double min, double max)
             }
             
             if((c != 46) && ((c < 48) || (c > 57 ))){
-                std::cout << "Sorry, I cannot understand your answer \n";
+                std::cout << "Sorry, I cannot understand your answer";
+                std::cout << std::endl;
+
                 break;
             } else if (c == 46){
                 // Entereed a decimal point - only allow one
                 if (decimal){
-                    std::cout << "Sorry, I cannot understand your answer \n";
+                    std::cout << "Sorry, I cannot understand your answer";
+                    std::cout << std::endl;
+
                     break;
                 } else {
                     decimal = true;
@@ -195,7 +209,9 @@ double promptDouble(std::string message, double min, double max)
         if ((final_double < min) || (final_double > max)){
             //std::cout << "You entered: " << final_double << " \n";
             //std::cout << "Please enter a number between [" << min <<", " << max << "] \n";
-            std::cout << "Sorry, I cannot understand your answer \n";
+            std::cout << "Sorry, I cannot understand your answer";
+            std::cout << std::endl;
+
             finished = false;
         }
     }
@@ -241,7 +257,9 @@ char* promptString(std::string message){
             char c = result[i];
             
             if(((c < 65) || (c > 90)) && ((c < 97) || (c > 122)) && (c != 32)){
-                std::cout << "Sorry, I cannot understand your answer \n";
+                std::cout << "Sorry, I cannot understand your answer";
+                std::cout << std::endl;
+
                 break;
             }
 
